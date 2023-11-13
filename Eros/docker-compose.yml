@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  db:
+    image: postgres
+    container_name: postgres_eros
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: eros_db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  postgres_admin:
+    container_name: postgres_admin_eros
+    image: 'dpage/pgadmin4'
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 9100:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=postgres@example.com
+      - PGADMIN_DEFAULT_PASSWORD=password
+
+  flyway:
+    image: flyway/flyway:7.15.0
+    depends_on: 
+      - db
+    volumes:
+      - ./data:/flyway/sql
+    command: -url=jdbc:postgresql://db/eros_db -user=postgres -password=password migrate
+volumes:
+  db-data:
